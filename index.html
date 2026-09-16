@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TVM Financial Calculator</title>
+
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --card: #ffffff;
+            --text: #172033;
+            --muted: #687386;
+            --primary: #2563eb;
+            --primary2: #1d4ed8;
+            --border: #dfe5ee;
+            --success: #087f5b;
+            --danger: #c92a2a;
+            --shadow: 0 12px 35px rgba(28, 43, 74, .08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a, #1e40af);
+            color: #fff;
+            padding: 42px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 34px;
+        }
+
+        header p {
+            margin: 0;
+            color: #dbeafe;
+            font-size: 15px;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 28px auto;
+            padding: 0 18px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: #fff;
+            color: #344054;
+            padding: 11px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            margin: 0 0 6px;
+        }
+
+        .desc {
+            color: var(--muted);
+            margin: 0 0 20px;
+            font-size: 14px;
+        }
+
+        .field {
+            margin: 14px 0;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cfd7e3;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+            background: #fff;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: 0;
+            border-radius: 9px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .btn:hover {
+            background: var(--primary2);
+        }
+
+        .result {
+            margin-top: 20px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .metric {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .metric span {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .metric strong {
+            font-size: 18px;
+        }
+
+        .error {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: right;
+        }
+
+        th {
+            background: #f1f5f9;
+            text-align: right;
+            position: sticky;
+            top: 0;
+        }
+
+        th:first-child,
+        td:first-child {
+            text-align: center;
+        }
+
+        .table-wrap {
+            max-height: 480px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .scenario-table td:first-child,
+        .scenario-table th:first-child {
+            text-align: left;
+        }
+
+        .highlight {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .formula {
+            background: #eef4ff;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            margin-top: 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #344054;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 30px;
+        }
+
+        @media(max-width:600px) {
+
+            header h1 {
+                font-size: 27px;
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+
+        <h1>Time Value of Money Calculator</h1>
+
+        <p>
+            BS3210 — Finance for Engineers, Designers and Professionals | Assignment 1
+        </p>
+
+    </header>
+
+
+    <div class="container">
+
+
+        <!-- TABS -->
+
+        <div class="tabs">
+
+            <button class="tab active" onclick="showTab('fv',this)">
+                Future Value
+            </button>
+
+            <button class="tab" onclick="showTab('pv',this)">
+                Present Value
+            </button>
+
+            <button class="tab" onclick="showTab('si',this)">
+                Simple Interest
+            </button>
+
+            <button class="tab" onclick="showTab('ci',this)">
+                Compound Interest
+            </button>
+
+            <button class="tab" onclick="showTab('emi',this)">
+                EMI
+            </button>
+
+            <button class="tab" onclick="showTab('amort',this)">
+                Amortization
+            </button>
+
+            <button class="tab" onclick="showTab('scenario',this)">
+                Scenario Analysis
+            </button>
+
+        </div>
+
+
+
+        <!-- FUTURE VALUE -->
+
+        <section id="fv" class="panel active">
+
+            <div class="card">
+
+                <h2>Future Value Calculator</h2>
+
+                <p class="desc">
+                    Calculate the future value of a principal amount using an annual interest rate.
+                </p>
+
+                <div class="grid">
+
+                    <div>
+
+                        <div class="field">
+
+                            <label>Principal Amount (₹)</label>
+
+                            <input id="fvP" type="number" min="0" step="0.01" placeholder="100000">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Annual Interest Rate (%)</label>
+
+                            <input id="fvR" type="number" min="0" step="0.01" placeholder="10">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Time Period (Years)</label>
+
+                            <input id="fvT" type="number" min="0" step="0.01" placeholder="5">
+
+                        </div>
+
+
+                        <button class="btn" onclick="calcFV()">
+
+                            Calculate Future Value
+
+                        </button>
+
+                        <div id="fvErr"></div>
+
+                    </div>
+
+                    <div id="fvOut"></div>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <b>Formula:</b>
+
+                    FV = P × (1 + r)<sup>t</sup>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- PRESENT VALUE -->
+
+        <section id="pv" class="panel">
+
+            <div class="card">
+
+                <h2>Present Value Calculator</h2>
+
+                <p class="desc">
+                    Find the present value of a future amount using a discount rate.
+                </p>
+
+                <div class="grid">
+
+                    <div>
+
+                        <div class="field">
+
+                            <label>Future Value (₹)</label>
+
+                            <input id="pvF" type="number" min="0" step="0.01" placeholder="150000">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Discount Rate (%)</label>
+
+                            <input id="pvR" type="number" min="0" step="0.01" placeholder="8">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Time Period (Years)</label>
+
+                            <input id="pvT" type="number" min="0" step="0.01" placeholder="5">
+
+                        </div>
+
+
+                        <button class="btn" onclick="calcPV()">
+
+                            Calculate Present Value
+
+                        </button>
+
+                        <div id="pvErr"></div>
+
+                    </div>
+
+                    <div id="pvOut"></div>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <b>Formula:</b>
+
+                    PV = FV ÷ (1 + r)<sup>t</sup>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- SIMPLE INTEREST -->
+
+        <section id="si" class="panel">
+
+            <div class="card">
+
+                <h2>Simple Interest Calculator</h2>
+
+                <p class="desc">
+                    Calculate interest earned and maturity value under simple interest.
+                </p>
+
+
+                <div class="grid">
+
+                    <div>
+
+                        <div class="field">
+
+                            <label>Principal (₹)</label>
+
+                            <input id="siP" type="number" min="0" step="0.01" placeholder="100000">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Interest Rate (%)</label>
+
+                            <input id="siR" type="number" min="0" step="0.01" placeholder="10">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Time (Years)</label>
+
+                            <input id="siT" type="number" min="0" step="0.01" placeholder="3">
+
+                        </div>
+
+
+                        <button class="btn" onclick="calcSI()">
+
+                            Calculate Interest
+
+                        </button>
+
+                        <div id="siErr"></div>
+
+                    </div>
+
+
+                    <div id="siOut"></div>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <b>Formula:</b>
+
+                    SI = P × r × t
+
+                    &nbsp; | &nbsp;
+
+                    Maturity Value = P + SI
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- COMPOUND INTEREST -->
+
+        <section id="ci" class="panel">
+
+            <div class="card">
+
+                <h2>Compound Interest Calculator</h2>
+
+                <p class="desc">
+                    Calculate compound interest and maturity value for different compounding frequencies.
+                </p>
+
+
+                <div class="grid">
+
+                    <div>
+
+
+                        <div class="field">
+
+                            <label>Principal (₹)</label>
+
+                            <input id="ciP" type="number" min="0" step="0.01" placeholder="100000">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Rate (%)</label>
+
+                            <input id="ciR" type="number" min="0" step="0.01" placeholder="10">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Time (Years)</label>
+
+                            <input id="ciT" type="number" min="0" step="0.01" placeholder="5">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Compounding Frequency</label>
+
+                            <select id="ciN">
+
+                                <option value="1">
+                                    Annually
+                                </option>
+
+                                <option value="2">
+                                    Half-Yearly
+                                </option>
+
+                                <option value="4" selected>
+                                    Quarterly
+                                </option>
+
+                                <option value="12">
+                                    Monthly
+                                </option>
+
+                                <option value="365">
+                                    Daily
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <button class="btn" onclick="calcCI()">
+
+                            Calculate Compound Interest
+
+                        </button>
+
+                        <div id="ciErr"></div>
+
+                    </div>
+
+
+                    <div id="ciOut"></div>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <b>Formula:</b>
+
+                    A = P × (1 + r/n)<sup>nt</sup>
+
+                    &nbsp; | &nbsp;
+
+                    CI = A − P
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- EMI -->
+
+        <section id="emi" class="panel">
+
+            <div class="card">
+
+                <h2>EMI Calculator</h2>
+
+                <p class="desc">
+                    Calculate monthly EMI, total payment and total interest payable for a loan.
+                </p>
+
+
+                <div class="grid">
+
+                    <div>
+
+
+                        <div class="field">
+
+                            <label>Loan Amount (₹)</label>
+
+                            <input id="emiP" type="number" min="0" step="0.01" placeholder="500000">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Annual Interest Rate (%)</label>
+
+                            <input id="emiR" type="number" min="0" step="0.01" placeholder="10">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Loan Tenure (Years)</label>
+
+                            <input id="emiT" type="number" min="0" step="0.1" placeholder="5">
+
+                        </div>
+
+
+                        <button class="btn" onclick="calcEMI()">
+
+                            Calculate EMI
+
+                        </button>
+
+                        <div id="emiErr"></div>
+
+                    </div>
+
+
+                    <div id="emiOut"></div>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <b>Formula:</b>
+
+                    EMI = P × r × (1+r)<sup>n</sup>
+                    ÷ ((1+r)<sup>n</sup> − 1)
+
+                    <br><br>
+
+                    where r is monthly interest rate and n is number of monthly payments.
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- AMORTIZATION -->
+
+        <section id="amort" class="panel">
+
+            <div class="card">
+
+                <h2>Loan Amortization Schedule</h2>
+
+                <p class="desc">
+                    Generate a complete month-by-month repayment schedule automatically.
+                </p>
+
+
+                <div class="row">
+
+
+                    <div class="field">
+
+                        <label>Loan Amount (₹)</label>
+
+                        <input id="amP" type="number" min="0" step="0.01" placeholder="500000">
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Annual Interest Rate (%)</label>
+
+                        <input id="amR" type="number" min="0" step="0.01" placeholder="10">
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>Tenure (Years)</label>
+
+                    <input id="amT" type="number" min="0.1" step="0.1" placeholder="5">
+
+                </div>
+
+
+                <button class="btn" onclick="calcAmort()">
+
+                    Generate Schedule
+
+                </button>
+
+
+                <div id="amErr"></div>
+
+                <div id="amOut"></div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- SCENARIO ANALYSIS -->
+
+        <section id="scenario" class="panel">
+
+            <div class="card">
+
+                <h2>Scenario Analysis</h2>
+
+                <p class="desc">
+                    Compare loan EMI and interest outcomes under the required interest-rate scenarios.
+                </p>
+
+
+                <div class="grid">
+
+                    <div>
+
+
+                        <div class="field">
+
+                            <label>Loan Amount (₹)</label>
+
+                            <input id="scP" type="number" min="0" step="0.01" placeholder="500000">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Loan Tenure (Years)</label>
+
+                            <input id="scT" type="number" min="0.1" step="0.1" placeholder="5">
+
+                        </div>
+
+
+                        <button class="btn" onclick="calcScenario()">
+
+                            Compare 8%, 10%, 12%, 15%
+
+                        </button>
+
+
+                        <div id="scErr"></div>
+
+                    </div>
+
+
+                    <div id="scOut"></div>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <b>Required scenarios:</b>
+
+                    8%, 10%, 12%, and 15% interest rates.
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </div>
+
+
+    <div class="footer">
+
+        TVM Financial Calculator • BS3210 Assignment 1
+
+    </div>
+
+
+
+    <script>
+
+
+        // MONEY FORMATTER
+
+        const money = n =>
+
+            new Intl.NumberFormat(
+                'en-IN',
+                {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 2
+                }
+            ).format(n);
+
+
+
+        // GET NUMBER
+
+        const num = id =>
+
+            parseFloat(
+                document.getElementById(id).value
+            );
+
+
+
+        // VALIDATION
+
+        function valid(ids) {
+
+            return ids.every(id => {
+
+                let v = num(id);
+
+                return Number.isFinite(v) && v >= 0;
+
+            });
+
+        }
+
+
+
+        // TAB SWITCHING
+
+        function showTab(id, btn) {
+
+            document
+                .querySelectorAll('.panel')
+                .forEach(x =>
+                    x.classList.remove('active')
+                );
+
+            document
+                .getElementById(id)
+                .classList.add('active');
+
+
+            document
+                .querySelectorAll('.tab')
+                .forEach(x =>
+                    x.classList.remove('active')
+                );
+
+            btn.classList.add('active');
+
+        }
+
+
+
+        // ERROR MESSAGE
+
+        function err(id, msg) {
+
+            document.getElementById(id).innerHTML =
+
+                msg
+                    ?
+                    `<div class="error">${msg}</div>`
+                    :
+                    '';
+
+        }
+
+
+
+        // RESULT CARDS
+
+        function metrics(items) {
+
+            return `
+
+<div class="result">
+
+<div class="result-grid">
+
+${items.map(x => `
+
+<div class="metric">
+
+<span>${x[0]}</span>
+
+<strong>${x[1]}</strong>
+
+</div>
+
+`).join('')}
+
+</div>
+
+</div>
+
+`;
+
+        }
+
+
+
+        // FUTURE VALUE
+
+        function calcFV() {
+
+            err('fvErr', '');
+
+            if (!valid(['fvP', 'fvR', 'fvT'])) {
+
+                err(
+                    'fvErr',
+                    'Please enter valid non-negative values.'
+                );
+
+                return;
+
+            }
+
+
+            let P = num('fvP');
+
+            let r = num('fvR') / 100;
+
+            let t = num('fvT');
+
+
+            let fv =
+
+                P * Math.pow(
+                    1 + r,
+                    t
+                );
+
+
+            document.getElementById('fvOut').innerHTML =
+
+                metrics([
+
+                    [
+                        'Future Value',
+                        money(fv)
+                    ],
+
+                    [
+                        'Interest Earned',
+                        money(fv - P)
+                    ]
+
+                ]);
+
+        }
+
+
+
+        // PRESENT VALUE
+
+        function calcPV() {
+
+            err('pvErr', '');
+
+            if (!valid(['pvF', 'pvR', 'pvT'])) {
+
+                err(
+                    'pvErr',
+                    'Please enter valid non-negative values.'
+                );
+
+                return;
+
+            }
+
+
+            let F = num('pvF');
+
+            let r = num('pvR') / 100;
+
+            let t = num('pvT');
+
+
+            let pv =
+
+                F /
+                Math.pow(
+                    1 + r,
+                    t
+                );
+
+
+            document.getElementById('pvOut').innerHTML =
+
+                metrics([
+
+                    [
+                        'Present Value',
+                        money(pv)
+                    ],
+
+                    [
+                        'Discounted Amount',
+                        money(F - pv)
+                    ]
+
+                ]);
+
+        }
+
+
+
+        // SIMPLE INTEREST
+
+        function calcSI() {
+
+            err('siErr', '');
+
+            if (!valid(['siP', 'siR', 'siT'])) {
+
+                err(
+                    'siErr',
+                    'Please enter valid non-negative values.'
+                );
+
+                return;
+
+            }
+
+
+            let P = num('siP');
+
+            let r = num('siR') / 100;
+
+            let t = num('siT');
+
+
+            let si =
+
+                P * r * t;
+
+
+            document.getElementById('siOut').innerHTML =
+
+                metrics([
+
+                    [
+                        'Interest Earned',
+                        money(si)
+                    ],
+
+                    [
+                        'Maturity Value',
+                        money(P + si)
+                    ]
+
+                ]);
+
+        }
+
+
+
+        // COMPOUND INTEREST
+
+        function calcCI() {
+
+            err('ciErr', '');
+
+            if (!valid(['ciP', 'ciR', 'ciT'])) {
+
+                err(
+                    'ciErr',
+                    'Please enter valid non-negative values.'
+                );
+
+                return;
+
+            }
+
+
+            let P = num('ciP');
+
+            let r = num('ciR') / 100;
+
+            let t = num('ciT');
+
+            let n =
+
+                parseInt(
+                    document.getElementById('ciN').value
+                );
+
+
+            let A =
+
+                P *
+                Math.pow(
+                    1 + r / n,
+                    n * t
+                );
+
+
+            document.getElementById('ciOut').innerHTML =
+
+                metrics([
+
+                    [
+                        'Compound Interest',
+                        money(A - P)
+                    ],
+
+                    [
+                        'Maturity Value',
+                        money(A)
+                    ],
+
+                    [
+                        'Frequency',
+                        document
+                            .getElementById('ciN')
+                            .selectedOptions[0]
+                            .text
+                    ]
+
+                ]);
+
+        }
+
+
+
+        // EMI CALCULATION
+
+        function emiValue(
+            P,
+            annualRate,
+            years
+        ) {
+
+            let n =
+
+                Math.round(
+                    years * 12
+                );
+
+
+            let r =
+
+                annualRate /
+                100 /
+                12;
+
+
+            if (n <= 0)
+
+                return {
+                    emi: 0,
+                    total: 0,
+                    interest: 0,
+                    n: 0
+                };
+
+
+            let emi =
+
+                r === 0
+
+                    ?
+
+                    P / n
+
+                    :
+
+                    P *
+                    r *
+                    Math.pow(1 + r, n)
+                    /
+                    (
+                        Math.pow(1 + r, n) - 1
+                    );
+
+
+            return {
+
+                emi: emi,
+
+                total: emi * n,
+
+                interest: emi * n - P,
+
+                n: n
+
+            };
+
+        }
+
+
+
+        // EMI CALCULATOR
+
+        function calcEMI() {
+
+            err('emiErr', '');
+
+
+            if (
+                !valid(['emiP', 'emiR', 'emiT'])
+                ||
+                num('emiT') <= 0
+            ) {
+
+                err(
+                    'emiErr',
+                    'Enter valid loan amount, rate and a tenure greater than 0.'
+                );
+
+                return;
+
+            }
+
+
+            let x =
+
+                emiValue(
+                    num('emiP'),
+                    num('emiR'),
+                    num('emiT')
+                );
+
+
+            document.getElementById('emiOut').innerHTML =
+
+                metrics([
+
+                    [
+                        'Monthly EMI',
+                        money(x.emi)
+                    ],
+
+                    [
+                        'Total Payment',
+                        money(x.total)
+                    ],
+
+                    [
+                        'Total Interest Payable',
+                        money(x.interest)
+                    ]
+
+                ]);
+
+        }
+
+
+
+        // AMORTIZATION SCHEDULE
+
+        function calcAmort() {
+
+            err('amErr', '');
+
+
+            if (
+                !valid(['amP', 'amR', 'amT'])
+                ||
+                num('amT') <= 0
+            ) {
+
+                err(
+                    'amErr',
+                    'Enter valid loan amount, rate and a tenure greater than 0.'
+                );
+
+                return;
+
+            }
+
+
+            let P = num('amP');
+
+            let annual = num('amR');
+
+            let years = num('amT');
+
+
+            let x =
+
+                emiValue(
+                    P,
+                    annual,
+                    years
+                );
+
+
+            let bal = P;
+
+            let r = annual / 100 / 12;
+
+            let rows = '';
+
+
+            for (
+                let m = 1;
+                m <= x.n;
+                m++
+            ) {
+
+                let interest = bal * r;
+
+                let principal =
+
+                    x.emi - interest;
+
+                let emi = x.emi;
+
+
+                if (m === x.n) {
+
+                    principal = bal;
+
+                    emi = principal + interest;
+
+                }
+
+
+                let closing =
+
+                    Math.max(
+                        0,
+                        bal - principal
+                    );
+
+
+                rows += `
+
+<tr>
+
+<td>${m}</td>
+
+<td>${money(bal)}</td>
+
+<td>${money(interest)}</td>
+
+<td>${money(principal)}</td>
+
+<td>${money(emi)}</td>
+
+<td>${money(closing)}</td>
+
+</tr>
+
+`;
+
+
+                bal = closing;
+
+            }
+
+
+
+            document.getElementById('amOut').innerHTML =
+
+                metrics([
+
+                    [
+                        'Monthly EMI',
+                        money(x.emi)
+                    ],
+
+                    [
+                        'Total Payment',
+                        money(x.total)
+                    ],
+
+                    [
+                        'Total Interest',
+                        money(x.interest)
+                    ]
+
+                ])
+
+
+                +
+
+                `
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Month</th>
+
+<th>Opening Balance</th>
+
+<th>Interest</th>
+
+<th>Principal Repaid</th>
+
+<th>EMI</th>
+
+<th>Closing Balance</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+${rows}
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+        }
+
+
+
+        // SCENARIO ANALYSIS
+
+        function calcScenario() {
+
+            err('scErr', '');
+
+
+            if (
+                !valid(['scP', 'scT'])
+                ||
+                num('scT') <= 0
+            ) {
+
+                err(
+                    'scErr',
+                    'Enter a valid loan amount and tenure greater than 0.'
+                );
+
+                return;
+
+            }
+
+
+            let P = num('scP');
+
+            let T = num('scT');
+
+
+            let rates = [
+                8,
+                10,
+                12,
+                15
+            ];
+
+
+            let rows =
+
+                rates.map(r => {
+
+                    let x =
+
+                        emiValue(
+                            P,
+                            r,
+                            T
+                        );
+
+
+                    return `
+
+<tr>
+
+<td>${r}%</td>
+
+<td class="highlight">
+${money(x.emi)}
+</td>
+
+<td>
+${money(x.total)}
+</td>
+
+<td>
+${money(x.interest)}
+</td>
+
+</tr>
+
+`;
+
+                }).join('');
+
+
+            document.getElementById('scOut').innerHTML =
+
+                `
+
+<div class="result">
+
+<table class="scenario-table">
+
+<thead>
+
+<tr>
+
+<th>Interest Rate</th>
+
+<th>Monthly EMI</th>
+
+<th>Total Payment</th>
+
+<th>Total Interest</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+${rows}
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+        }
+
+    </script>
+
+</body>
+
+</html>
